@@ -4,17 +4,22 @@
 #include<iostream>
 #include<windows.h>
 #include<string>
-#include <tchar.h>
-#include<Strsafe.h> 
+#include<tchar.h>
+#include<Strsafe.h>
 #include<io.h>  
 #include<fcntl.h>
 #include<list>
 #include<vector>
 #include<shlwapi.h>
+#include <math.h>
+#include <dbt.h>
+
+#include "FileSynManager.h"
+#include "USBManager.h"
 
 #pragma comment(lib, "shlwapi.lib")
 
-#define MAX_PATH 1024
+//WCHAR usbDeviceRoot;
 
 using namespace std;
 
@@ -23,10 +28,41 @@ list<wstring> relativePathList;
 vector<wstring> filterList;
 int basePathSize;
 
-bool isSynFile(LPCTSTR path);
-bool FileSyn(LPWSTR src, LPWSTR dis);
-void InitConsole();
-void findFile(LPWSTR path);
+LRESULT CALLBACK WndProc(HWND h, UINT msg, WPARAM wp, LPARAM lp)
+{
+    if (msg == WM_DEVICECHANGE) {
+        if ((DWORD)wp == DBT_DEVICEARRIVAL) {
+            DEV_BROADCAST_VOLUME* p = (DEV_BROADCAST_VOLUME*) lp;
+            if (p->dbcv_devicetype == DBT_DEVTYP_VOLUME) {
+                int l = (int)(log(double(p->dbcv_unitmask)) / log(double(2)));
+				LPWSTR usbDeviceRoot = new WCHAR;
+				*usbDeviceRoot = 'A' + l;
+				*(usbDeviceRoot + 1) = L'\0';
+				LPWSTR desPath = new WCHAR;
+
+				//
+				FileSynManager& manager = FileSynManager::Instance();
+				manager.setSrcPath(L"E:\\Xieyuan\\uestc\\git-repos\\SimpleMusicPlayer");
+				StringCchCopy(desPath, MAX_PATH, usbDeviceRoot);
+				StringCchCat(desPath, MAX_PATH, L":\\");
+				StringCchCat(desPath, MAX_PATH, L"cpy");
+				wcout << desPath << endl;
+				manager.setDesPath(desPath);
+				manager.setfilterList(filterList);
+				manager.FileSyn();
+                //printf("啊……%c盘插进来了\n", 'A' + l);
+            }
+        } else if ((DWORD)wp == DBT_DEVICEREMOVECOMPLETE) {
+            DEV_BROADCAST_VOLUME* p = (DEV_BROADCAST_VOLUME*) lp;
+            if (p->dbcv_devicetype == DBT_DEVTYP_VOLUME) {
+                int l = (int)(log(double(p->dbcv_unitmask)) / log(double(2)));
+				//usbDeviceRoot = 'A' + l;
+                printf("啊……%c盘被拔掉了\n", 'A' + l);
+            }
+        }
+        return TRUE;
+    } else return DefWindowProc(h, msg, wp, lp);
+}
 
 void InitConsole()  
 {  
@@ -39,99 +75,39 @@ void InitConsole()
     setvbuf(stdout, NULL, _IONBF, 0);  
 }
 
-void findFile(LPWSTR path) {
-
-	WIN32_FIND_DATA FindFileData;  
-    HANDLE hFind=INVALID_HANDLE_VALUE;  
-    wchar_t DirSpec[MAX_PATH];                  //定义要遍历的文件夹的目录  
-    DWORD dwError;  
-    StringCchCopy(DirSpec, MAX_PATH, path);  
-    StringCchCat(DirSpec, MAX_PATH, TEXT("\\*"));   //定义要遍历的文件夹的完整路径\*  
-	
-	hFind=FindFirstFile(DirSpec, &FindFileData);          //找到文件夹中的第一个文件  
-    if (hFind == INVALID_HANDLE_VALUE) {                               
-		//如果hFind句柄创建失败，输出错误信息   
-        FindClose(hFind);   
-        return;    
-    } else {  
-        while (FindNextFile(hFind, &FindFileData) != 0) {                           
-			//当文件或者文件夹存在时  
-            if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0
-				&& wcscmp(FindFileData.cFileName, L".") == 0
-				|| wcscmp(FindFileData.cFileName, L"..") == 0) {      
-				//判断是文件夹&&表示为"."||表示为"."  
-				//排除. 和 ..
-                 continue;  
-            }  
-            if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) {
-				//判断如果是文件夹  
-				LPWSTR DirAdd =  new WCHAR[MAX_PATH];  
-                //StringCchCopy(DirAdd, MAX_PATH, path);
-				StringCchCopy(DirAdd, MAX_PATH, path);
-				StringCchCat(DirAdd, MAX_PATH, TEXT("\\"));  
-                StringCchCat(DirAdd, MAX_PATH, FindFileData.cFileName);       //拼接得到此文件夹的完整路径
-				findFile(DirAdd);                                  //实现递归调用  
-            }  
-            if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)    //如果不是文件夹  
-            {  
-                //wcout << path << "\\" << FindFileData.cFileName << endl;            //输出完整路径
-				//relativePathList.assign(FindFileData.cFileName);
-				WCHAR* name = FindFileData.cFileName;
-				wstring ws_name(name);
-				wstring ws_path(path);
-				wstring ws_abslutePath;
-				ws_abslutePath += ws_path + ws_name;
-				//string s_abslutePath(ws_abslutePath.begin(), ws_abslutePath.end());
-				if (!isSynFile(ws_abslutePath.c_str()))
-					continue;
-				wstring ws_relativePath = ws_abslutePath.substr(basePathSize, ws_abslutePath.size());
-				relativePathList.push_back(ws_relativePath);
-            }  
-        }  
-        FindClose(hFind);  
-    }  
-}
-
-bool isSynFile(LPCTSTR path) {
-	int i = 0;
-	for (i = 0; i < filterList.size(); i++) {
-		wstring tmp = filterList[i];
-		LPTSTR tag = PathFindExtension(path);
-		wstring ws_tag(tag);
-		if (tmp == tag)
-			return true;
-	}
-	return false;
-}
-
-bool FileSyn(LPWSTR src, LPWSTR dis) {
-	/**
-	 *参数：
-	 *src 需要复制的文件夹路径
-	 *dis 目标文件夹路径
-	 */
-	findFile(src);
-
-	return false;
-}
-
 int _stdcall WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int nShowCmd) {
 	InitConsole();
 	filterList.push_back(L".sln");
 	filterList.push_back(L".java");
-	LPWSTR src = L"E:\\Xieyuan\\uestc\\git-repos\\SimpleMusicPlayer";
-	wstring ws_src(src);
-	basePathSize = ws_src.size();
-	FileSyn(src, L"D:\TDDOWNLOAD");
-//	cout << MoveFile(L"E:\\tmp\\html\\html\\admin_deviceOP.php", L"E:\\tmp\\test") << endl;
-	if (!CopyFile(L"E:\\tmp\\html\\html\\admin_deviceOP.php", L"E:\\tmp\\test", FALSE)) {
-		wcout << GetLastError() << endl;
-	}
-	while (!relativePathList.empty())
-	{
-		wcout << relativePathList.back() << endl;
-		relativePathList.pop_back();
-	}
+	/*FileSynManager& manager = FileSynManager::Instance();
+	manager.setSrcPath(L"E:\\Xieyuan\\uestc\\git-repos\\SimpleMusicPlayer");
+	manager.setDesPath(L"D:\TDDOWNLOAD");
+	manager.setfilterList(filterList);
+	manager.FileSyn();*/
+
+
+	WNDCLASS wc;
+    ZeroMemory(&wc, sizeof(wc));
+    wc.lpszClassName = TEXT("myusbmsg");
+    wc.lpfnWndProc = WndProc;
+     
+    RegisterClass(&wc);
+    HWND h = CreateWindow(TEXT("myusbmsg"), TEXT(""), 0, 0, 0, 0, 0,
+        0, 0, GetModuleHandle(0), 0);
+    MSG msg;
+    while( GetMessage(&msg, 0, 0, 0) > 0 ) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+	/*USBManager usbManager;
+	MSG msg;
+	while( GetMessage(&msg, 0, 0, 0) > 0 ) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+		wcout << L"啊……" << usbManager.GetDeviceRoot() << L"盘插进来了" << endl;
+    }*/
+	
 	system("pause");
 	return 0;
 }

@@ -21,12 +21,24 @@
     <ClCompile Include="FileSynManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="InitManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeFilter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FileSynManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="USBManager.h">
+    <ClInclude Include="InitManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileFilter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeFilter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -15,7 +15,7 @@
 #include <dbt.h>
 
 #include "FileSynManager.h"
-#include "USBManager.h"
+#include "InitManager.h"
 
 #pragma comment(lib, "shlwapi.lib")
 
@@ -38,17 +38,20 @@ LRESULT CALLBACK WndProc(HWND h, UINT msg, WPARAM wp, LPARAM lp)
 				LPWSTR usbDeviceRoot = new WCHAR;
 				*usbDeviceRoot = 'A' + l;
 				*(usbDeviceRoot + 1) = L'\0';
-				LPWSTR desPath = new WCHAR;
+				LPWSTR desPath = new WCHAR[MAX_PATH];
 
-				//
+				InitManager init;
+				init.getConfigFileContent();
+				init.configAnalyze();
+
 				FileSynManager& manager = FileSynManager::Instance();
-				manager.setSrcPath(L"E:\\Xieyuan\\uestc\\git-repos\\SimpleMusicPlayer");
+				manager.setSrcPath(init.getSrcFolderPath());
 				StringCchCopy(desPath, MAX_PATH, usbDeviceRoot);
 				StringCchCat(desPath, MAX_PATH, L":\\");
-				StringCchCat(desPath, MAX_PATH, L"cpy");
+				StringCchCat(desPath, MAX_PATH, init.getDesFolderPath());
 				wcout << desPath << endl;
 				manager.setDesPath(desPath);
-				manager.setfilterList(filterList);
+				manager.setfilterList(init.getFilterList());
 				manager.FileSyn();
                 //printf("°¡¡­¡­%cÅÌ²å½øÀ´ÁË\n", 'A' + l);
             }
@@ -79,6 +82,7 @@ int _stdcall WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine
 	InitConsole();
 	filterList.push_back(L".sln");
 	filterList.push_back(L".java");
+
 	/*FileSynManager& manager = FileSynManager::Instance();
 	manager.setSrcPath(L"E:\\Xieyuan\\uestc\\git-repos\\SimpleMusicPlayer");
 	manager.setDesPath(L"D:\TDDOWNLOAD");

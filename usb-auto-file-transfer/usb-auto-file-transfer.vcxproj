@@ -52,6 +52,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -77,11 +78,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FileSynManager.cpp" />
+    <ClCompile Include="InitManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="TimeFilter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FileFilter.h" />
     <ClInclude Include="FileSynManager.h" />
-    <ClInclude Include="USBManager.h" />
+    <ClInclude Include="InitManager.h" />
+    <ClInclude Include="TimeFilter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

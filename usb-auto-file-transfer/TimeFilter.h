@@ -1,5 +1,8 @@
 #include "FileFilter.h"
 
+#ifndef TIMEFILTER_H
+#define TIMEFILTER_H
+
 class TimeFilter : private FileFilter {
 
 public:
@@ -7,6 +10,8 @@ public:
 	TimeFilter();
 	~TimeFilter();
 
-	bool filter(wstring file);
+	bool filter(wstring file, wstring desFile);
 
 };
+
+#endif

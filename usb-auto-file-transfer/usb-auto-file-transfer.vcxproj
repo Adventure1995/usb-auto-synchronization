@@ -77,12 +77,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ExtentionFilter.cpp" />
+    <ClCompile Include="FileFilter.cpp" />
     <ClCompile Include="FileSynManager.cpp" />
     <ClCompile Include="InitManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TimeFilter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ConsoleManager.h" />
+    <ClInclude Include="ExtentionFilter.h" />
     <ClInclude Include="FileFilter.h" />
     <ClInclude Include="FileSynManager.h" />
     <ClInclude Include="InitManager.h" />

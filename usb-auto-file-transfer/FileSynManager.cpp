@@ -1,14 +1,4 @@
 #include "FileSynManager.h"
-#include<shlwapi.h>
-#include<string>
-#include<Strsafe.h>
-#include<iostream>
-#include<shlwapi.h>
-#include<Shlobj.h>
-
-#include "FileSynManager.h"
-
-#pragma comment(lib, "shlwapi.lib")
 
 FileSynManager& FileSynManager::Instance() {
 	if (instance_ == NULL)
@@ -29,11 +19,15 @@ FileSynManager::~FileSynManager() {
 
 
 
-void FileSynManager::setfilterList(vector<wstring> filterList) {
+/*void FileSynManager::setfilterList(vector<wstring> filterList) {
 	this->filterList = filterList;
+}*/
+
+void FileSynManager:: addFilterList(FileFilter* filter) {
+	filterList.push_back(filter);
 }
 
-bool FileSynManager::isSynFile(LPCTSTR path) {
+/*bool FileSynManager::isSynFile(LPCTSTR path) {
 	int i = 0;
 	for (i = 0; i < filterList.size(); i++) {
 		wstring tmp = filterList[i];
@@ -43,7 +37,7 @@ bool FileSynManager::isSynFile(LPCTSTR path) {
 			return true;
 	}
 	return false;
-}
+}*/
 
 bool FileSynManager::FileSyn() {
 
@@ -53,20 +47,35 @@ bool FileSynManager::FileSyn() {
 	{
 		//wcout << relativePathList.back() << endl;
 		//relativePathList.pop_back();
-		LPWSTR abslutePath = new WCHAR[MAX_PATH];
-		StringCchCopy(abslutePath, MAX_PATH, desPath);
-		StringCchCat(abslutePath, MAX_PATH, L"\\");
-		StringCchCat(abslutePath, MAX_PATH, relativePathList.back().c_str());
+		LPWSTR srcAbslutePath = new WCHAR[MAX_PATH];
+		StringCchCopy(srcAbslutePath, MAX_PATH, srcPath);
+		StringCchCat(srcAbslutePath, MAX_PATH, L"\\");
+		StringCchCat(srcAbslutePath, MAX_PATH, relativePathList.back().c_str());
+		LPWSTR desAbslutePath = new WCHAR[MAX_PATH];
+		StringCchCopy(desAbslutePath, MAX_PATH, desPath);
+		StringCchCat(desAbslutePath, MAX_PATH, L"\\");
+		StringCchCat(desAbslutePath, MAX_PATH, relativePathList.back().c_str());
 		relativePathList.pop_back();
-		wstring name(PathFindFileName(srcAbslutePathList.back().c_str()));
-		wstring ws_name(name);
-		wstring ws_newFolder(abslutePath);
-		ws_newFolder = ws_newFolder.substr(0, ws_newFolder.size() - name.size());
+		wstring ws_name(PathFindFileName(srcAbslutePath));
+		//wstring ws_name(name);
+		wstring ws_newFolder(desAbslutePath);
+		ws_newFolder = ws_newFolder.substr(0, ws_newFolder.size() - ws_name.size());
+		
+		bool isSynFile = true;
+		for (list<FileFilter*>::iterator iterator = filterList.begin(); iterator != filterList.end(); ++iterator) {
+			if ((*iterator)->filter(wstring(srcAbslutePath), wstring(desAbslutePath)) == false) {
+				isSynFile = false;
+				break;
+			}
+		}
+		if (isSynFile == false)
+			continue;
+
 		SHCreateDirectoryEx(NULL, ws_newFolder.c_str(), NULL);
-		if (!CopyFile(srcAbslutePathList.back().c_str(), abslutePath, false)) {
+		if (!CopyFile(srcAbslutePath, desAbslutePath, false)) {
 			cout << GetLastError() << endl;
 		}
-		srcAbslutePathList.pop_back();
+		//srcAbslutePathList.pop_back();
 	}
 
 	return false;
@@ -110,10 +119,11 @@ void FileSynManager::findFile(LPWSTR path) {
 				wstring ws_name(name);
 				wstring ws_path(path);
 				wstring ws_abslutePath(ws_path + L"\\" + ws_name);//输出完整路径
-				if (!isSynFile(ws_abslutePath.c_str()))
-					continue;
-				srcAbslutePathList.push_back(ws_abslutePath);
+				//if (!isSynFile(ws_abslutePath.c_str()))
+				//	continue;
+				//srcAbslutePathList.push_back(ws_abslutePath);
 				wstring ws_relativePath = ws_abslutePath.substr(absluteRootLength + 1, ws_abslutePath.size());
+				wcout << ws_relativePath << endl;
 				relativePathList.push_back(ws_relativePath);
             }  
         }  

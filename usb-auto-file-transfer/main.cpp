@@ -51,7 +51,9 @@ LRESULT CALLBACK WndProc(HWND h, UINT msg, WPARAM wp, LPARAM lp)
 				StringCchCat(desPath, MAX_PATH, init.getDesFolderPath());
 				wcout << desPath << endl;
 				manager.setDesPath(desPath);
-				manager.setfilterList(init.getFilterList());
+				//manager.setfilterList(init.getFilterList());
+				ExtentionFilter* filter = new ExtentionFilter;
+				manager.addFilterList(filter);
 				manager.FileSyn();
                 //printf("°¡¡­¡­%cÅÌ²å½øÀ´ÁË\n", 'A' + l);
             }

@@ -3,12 +3,13 @@
 #include <fstream>  
 #include <string>
 #include<Strsafe.h>
+#include "Util.h"
 
 #include "InitManager.h"
 
 using namespace std;
 
-std::wstring s2ws(const std::string& s)
+/*std::wstring s2ws(const std::string& s)
 {
     int len;
     int slength = (int)s.length() + 1;
@@ -18,7 +19,7 @@ std::wstring s2ws(const std::string& s)
     std::wstring r(buf);
     delete[] buf;
     return r;
-}
+}*/
 
 bool InitManager::getConfigFileContent() {
 
@@ -30,7 +31,6 @@ bool InitManager::getConfigFileContent() {
 		// 有该文件  
         while (getline (configStream, line)) // line中不包括每行的换行符  
         {   
-            cout << line << endl;
 			configContent.push_back(line);
         }
 		return true;

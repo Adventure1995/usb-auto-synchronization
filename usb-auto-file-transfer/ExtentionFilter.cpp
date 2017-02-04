@@ -15,6 +15,7 @@ bool ExtentionFilter::filter(wstring srcFile, wstring desFile) {
 ExtentionFilter::ExtentionFilter(): FileFilter() {
 	filterList.push_back(L".java");
 	filterList.push_back(L".docx");
+	filterList.push_back(L".mp4");
 };
 
 ExtentionFilter::~ExtentionFilter() {

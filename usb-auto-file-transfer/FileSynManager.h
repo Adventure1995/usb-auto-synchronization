@@ -2,6 +2,7 @@
 
 #include<windows.h>
 #include<list>
+#include<map>
 #include<vector>
 #include<shlwapi.h>
 #include<string>

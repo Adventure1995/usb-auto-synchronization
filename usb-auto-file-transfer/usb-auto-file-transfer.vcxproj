@@ -77,12 +77,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ConsoleManager.cpp" />
     <ClCompile Include="ExtentionFilter.cpp" />
     <ClCompile Include="FileFilter.cpp" />
     <ClCompile Include="FileSynManager.cpp" />
     <ClCompile Include="InitManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="TimeFilter.cpp" />
+    <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsoleManager.h" />
@@ -91,6 +93,7 @@
     <ClInclude Include="FileSynManager.h" />
     <ClInclude Include="InitManager.h" />
     <ClInclude Include="TimeFilter.h" />
+    <ClInclude Include="Util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

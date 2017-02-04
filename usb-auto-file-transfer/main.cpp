@@ -49,7 +49,6 @@ LRESULT CALLBACK WndProc(HWND h, UINT msg, WPARAM wp, LPARAM lp)
 				StringCchCopy(desPath, MAX_PATH, usbDeviceRoot);
 				StringCchCat(desPath, MAX_PATH, L":\\");
 				StringCchCat(desPath, MAX_PATH, init.getDesFolderPath());
-				wcout << desPath << endl;
 				manager.setDesPath(desPath);
 				//manager.setfilterList(init.getFilterList());
 				ExtentionFilter* filter = new ExtentionFilter;
@@ -81,7 +80,7 @@ void InitConsole()
 }
 
 int _stdcall WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int nShowCmd) {
-	InitConsole();
+	//InitConsole();
 	filterList.push_back(L".sln");
 	filterList.push_back(L".java");
 
@@ -105,14 +104,6 @@ int _stdcall WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-
-	/*USBManager usbManager;
-	MSG msg;
-	while( GetMessage(&msg, 0, 0, 0) > 0 ) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-		wcout << L"°¡¡­¡­" << usbManager.GetDeviceRoot() << L"ÅÌ²å½øÀ´ÁË" << endl;
-    }*/
 	
 	system("pause");
 	return 0;

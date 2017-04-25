@@ -10,7 +10,7 @@ public:
 	TimeFilter();
 	~TimeFilter();
 
-	bool filter(wstring file, wstring desFile);
+	list<wstring> filter(list<wstring> src);
 
 };
 

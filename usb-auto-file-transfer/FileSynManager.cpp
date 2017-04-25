@@ -128,7 +128,6 @@ bool FileSynManager::FileSyn() {
 			count++;
 		} else {
 			//ConsoleManager::printCopyInfo(locate++, total, srcAbslutePath, desAbslutePath, 1);
-			cout << GetLastError() << endl;
 			failedSynFileList.push_back(srcAbslutePath);
 		}
 		srcSynList.pop_back();

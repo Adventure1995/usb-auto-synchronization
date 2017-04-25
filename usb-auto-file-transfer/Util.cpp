@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Util.h"
 
 //string WstringToString(const wstring str);
